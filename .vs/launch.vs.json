@@ -1,0 +1,26 @@
+{
+  "version": "0.2.1",
+  "configurations": [
+    {
+      "project": "CMakeLists.txt",
+      "projectTarget": "stm32f103rb_1104_bldc_as5047p.elf",
+      "name": "Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "program": "${debugInfo.fullTargetPath}",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${st.gdb}",
+      "miDebuggerServerAddress": "localhost:3333",
+      "debugServerPath": "${st.gdbserver}",
+      "debugServerArgs": "--stm32cubeprogrammer-path ${st.cubeprogrammer} --swd --port-number 3333",
+      "serverStarted": "Waiting for connection on port .*\\.\\.\\.",
+      "stopAtConnect": true,
+      "postRemoteConnectCommands": [
+        {
+          "text": "load build/debug/build/stm32f103rb_1104_bldc_as5047p.elf"
+        }
+      ],
+      "svdPath": "${st.svd}/STM32F103.svd"    }
+  ]
+}

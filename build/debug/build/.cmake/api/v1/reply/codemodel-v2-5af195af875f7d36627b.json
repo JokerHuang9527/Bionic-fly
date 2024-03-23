@@ -1,0 +1,60 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "stm32f103rb_1104_bldc_as5047p",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "stm32f103rb_1104_bldc_as5047p::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-stm32f103rb_1104_bldc_as5047p-Debug-ca5efda499dfa4a97e94.json",
+					"name" : "stm32f103rb_1104_bldc_as5047p",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/stm32f103rb_1104_bldc_as5047p(2024.03.06)/build/debug/build",
+		"source" : "D:/stm32f103rb_1104_bldc_as5047p(2024.03.06)"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 5
+	}
+}

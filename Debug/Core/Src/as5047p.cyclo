@@ -1,0 +1,14 @@
+../Core/Src/as5047p.c:59:8:as5047p_make_handle	1
+../Core/Src/as5047p.c:79:6:as5047p_reset	1
+../Core/Src/as5047p.c:92:6:as5047p_config	1
+../Core/Src/as5047p.c:112:10:as5047p_get_error_status	1
+../Core/Src/as5047p.c:127:8:as5047p_get_position	3
+../Core/Src/as5047p.c:162:8:as5047p_get_angle	2
+../Core/Src/as5047p.c:181:6:as5047p_set_zero	1
+../Core/Src/as5047p.c:197:13:as5047p_nop	1
+../Core/Src/as5047p.c:210:6:as5047p_send_command	2
+../Core/Src/as5047p.c:233:6:as5047p_send_data	2
+../Core/Src/as5047p.c:257:10:as5047p_read_data	1
+../Core/Src/as5047p.c:269:13:as5047p_spi_transmit	1
+../Core/Src/as5047p.c:284:17:as5047p_spi_receive	1
+../Core/Src/as5047p.c:298:9:is_even_parity	2
