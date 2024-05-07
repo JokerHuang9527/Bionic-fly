@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "math.h"
+#define PI 3.1415926;
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -180,6 +182,7 @@ void as5047p_delay(void);
   */
 int main(void)
 {
+
   /* USER CODE BEGIN 1 */
 	void as5047p_spi_send(uint16_t data)
 	{
@@ -213,112 +216,257 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
+	HAL_Init();
 
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+	SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_SPI1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM3_Init();
-  MX_TIM4_Init();
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	MX_SPI1_Init();
+	MX_TIM1_Init();
+	MX_TIM2_Init();
+	MX_TIM3_Init();
+	MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
-  TIM1->CCR1 = 9999;
-  TIM1->CCR2 = 9999;
+	TIM1->CCR1 = 9999;
+	TIM1->CCR2 = 9999;
+	TIM1->CCR3 = 900;
+	TIM2->CCR2 = 900;
+	TIM1->CCR4 = 900;
 
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_2);
-  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
-  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+
+  //HAL_TIM_Base_Start_IT(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_Base_Start_IT(&htim2);
+	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 //  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  printf("------------1104 DUAL BLDC speed control and encoder test--------------------------\r\n");
-  as5047p_handle_t as5047p;
+	printf("------------1104 DUAL BLDC speed control and encoder test--------------------------\r\n");
+	as5047p_handle_t as5047p;
 
-  as5047p_make_handle(&as5047p_spi_send,
-                      &as5047p_spi_read,
-                      &as5047p_spi_select,
-                      &as5047p_spi_deselect,
-                      &as5047p_delay,
-                      &as5047p);
+	as5047p_make_handle(&as5047p_spi_send,
+					  &as5047p_spi_read,
+					  &as5047p_spi_select,
+					  &as5047p_spi_deselect,
+					  &as5047p_delay,
+					  &as5047p);
 
-  as5047p_config(&as5047p, 0b00100101, 0b00000000);
-  as5047p_set_zero(&as5047p, 0);
+	as5047p_config(&as5047p, 0b00100101, 0b00000000);
+	as5047p_set_zero(&as5047p, 0);
 
-  HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
-  __HAL_TIM_SET_COUNTER(&htim3, 0);
-  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-  __HAL_TIM_SET_COUNTER(&htim3, 0);
+	__HAL_TIM_SET_COUNTER(&htim2, 300000);
+	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+	__HAL_TIM_SET_COUNTER(&htim3, 0);
+	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+	__HAL_TIM_SET_COUNTER(&htim4, 0);
 
 
 
-  printf("\r\nSTM32-AS5047P, Ready\r\n");
-  /* USER CODE END 2 */
+	printf("\r\nSTM32-AS5047P, Ready\r\n");
+	/* USER CODE END 2 */
+	__HAL_TIM_SetCounter(&htim1, 100);
+	__HAL_TIM_SetCounter(&htim2, 100);
+
+
+	int prev_left, prev_right, fly_mode = 0;
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
+	while (1)
+	{
+	//	  printf("test");
+	//	  printf_ENTER();
+	//	    // 读�?��?�获??
+	//	    current_capture = __HAL_TIM_GET_COMPARE(&htim2, TIM_CHANNEL_1);
+	//
+	//	    // 计�?��?��??
+	//	    if (current_capture >= prev_capture) {
+	//	      frequency = HAL_RCC_GetPCLK1Freq() / (current_capture - prev_capture);
+	//	    } else {
+	//	      frequency = 0;  // ?��??�溢?��等问�??????????
+	//	    }
+	//
+	//	    // ??�印频�??
+	//	    printf("Frequency: %lu Hz\r\n", frequency);
+	//
+	//	    prev_capture = current_capture;
+	//
+		  // ?��?��?�延迟�?�可以�?�整
 
-//	  printf("test");
-//	  printf_ENTER();
-//	    // 读�?��?�获??
-//	    current_capture = __HAL_TIM_GET_COMPARE(&htim2, TIM_CHANNEL_1);
-//
-//	    // 计�?��?��??
-//	    if (current_capture >= prev_capture) {
-//	      frequency = HAL_RCC_GetPCLK1Freq() / (current_capture - prev_capture);
-//	    } else {
-//	      frequency = 0;  // ?��??�溢?��等问�????????
-//	    }
-//
-//	    // ??�印频�??
-//	    printf("Frequency: %lu Hz\r\n", frequency);
-//
-//	    prev_capture = current_capture;
-//
-	      // ?��?��?�延迟�?�可以�?�整
+		//void as5047p_spi_select();
+		//	  float angle;
+		//	  as5047p_get_angle(&as5047p, without_daec, &angle);
+		//	  printf("Angle: %3i\r\n", (int)angle);
 
-	    //void as5047p_spi_select();
-	    //	  float angle;
-	    //	  as5047p_get_angle(&as5047p, without_daec, &angle);
-	    //	  printf("Angle: %3i\r\n", (int)angle);
-		int left =__HAL_TIM_GET_COUNTER(&htim3);
-		int right =__HAL_TIM_GET_COUNTER(&htim4);
-		int prev_left, prev_right;
+		/*wing speed and phase control*/
+		__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_3, TIM1->CCR3);
+		__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, TIM1->CCR4);
+		__HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, TIM2->CCR2);
+		float left =__HAL_TIM_GET_COUNTER(&htim3);
+		float right =__HAL_TIM_GET_COUNTER(&htim4);
 
-		/*as5047p??��??��?��?�是0~65535，�?��?��?��???�大概是4096??�此將其依照比�?��?��?�為360度�??*/
-		float left_angle = left/4096.0*360.0;
-		float right_angle = right/4096.0*360.0;
-		float phase_diff = (left_angle > right_angle)?
+		if(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET)
+		{
+			fly_mode++;
+
+			while (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET);
+			HAL_Delay(50);
+			// while(HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET){}
+		}
+
+		/*phase detect*/
+		float left_angle = left / 5.55555;//900 degree MAX
+		float right_angle = right / 5.55555;//900 degree MAX
+		int phase_diff = (left_angle > right_angle)?
 				(left_angle - right_angle):(right_angle - left_angle);
-		__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_3, 1100);
-		__HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, 1250);
-
-		/*?��?��?��延遲??��??100毫�?��?��?�此將現?��??��?�到??��?�度???100毫�?��?��?��?�到??��?�度?��差除�?100毫�?��??*/
-		int left_speed = (left - prev_left) / 4096.0 * 360.0 / 100.0;//rps
-		int right_speed = (right - prev_right) / 4096.0 * 360.0 / 100.0;//rps
-
+		int left_speed = (left - prev_left) / 5.55555 / 0.1 / 60;//rps
+		int right_speed = (right - prev_right) / 5.55555 / 0.1/ 60;//rps
+		int speed_diff = (left_speed > right_speed)?
+						(left_speed - right_speed):(right_speed - left_speed);
 		prev_left = left;
 		prev_right = right;
-		printf("phase difference : %.1f\r\n", phase_diff);
+
+		printf("left angle : %.1f\r\n", left_angle);
+		printf("right angle : %.1f\r\n", right_angle);
+		printf("phase difference : %d\r\n", phase_diff);
 		printf("left motor speed : %d per sec\rright motor speed : %d per sec\r\n",
 				left_speed, right_speed);
+		printf("speed difference : %d\r\n", speed_diff);
+		printf("flying mode is %d\n", fly_mode);
+
+		/*phase control*/
+		switch(fly_mode)
+		{
+		case 1://wing sync
+			/*fore wing speed*/
+			TIM1->CCR3 = 970;//left wing speed
+			TIM2->CCR2 = 970;//right wing speed
+			TIM1->CCR4 = 970;
+			break;
+			/*correction of the balanced speed on both wings*/
+//			if(speed_diff != 600)
+//			{
+//				if(left_speed < right_speed)
+//				{
+//					TIM1->CCR3++;//left wing speed
+//					TIM2->CCR2--;//right wing speed
+//				}
+//				if(left_speed > right_speed)
+//				{
+//					TIM1->CCR3--;//left wing speedㄌ
+//					TIM2->CCR2++;//right wing speed
+//				}
+//				/*hind wing speed*/
+//			}
+		case 2:
+			if(right_speed < 140)
+				TIM1->CCR3++;
+			else if(right_speed > 140)
+				TIM1->CCR3--;	//left wing speed
+			break;
+//		case 2:
+//			if(right_speed < 125)
+//				TIM1->CCR3++;
+//			else if(right_speed > 125)
+//				TIM1->CCR3--;	//left wing speed
+//			if(right_speed < 125)
+//				TIM2->CCR2++;
+//			else if(left_speed > 125)
+//				TIM2->CCR2--;	//left wing speed
+//			break;
+
+
+
+//
+//		case 2://left wing ahead 90 degree
+//			if(TIM1->CCR3 < 1300)
+//				TIM1->CCR3 += 10;
+//			else
+//				fly_mode = 3;//decrease the speed.
+//			break;
+//		case 3:
+//			if(TIM1->CCR3 > 1150)
+//				TIM1->CCR3 -= 10;
+//			else
+//				 fly_mode = 1;//back to sync.
+//			break;
+			//////////////////////////////////////////
+//		case 2://right wing ahead 90 degree
+//		  	if(phase_diff != 90)
+//		  	{
+//		  		if(phase_diff < 90)
+//		  			TIM2->CCR2 += 10;
+//		  		if(phase_diff > 90)
+//		  			TIM2->CCR2 -= 10;
+//		  	}
+//			else
+//				fly_mode = 1;//decrease the speed.
+//			break;
+////		  case 3:
+//			if(TIM2->CCR2 > 970)
+//				TIM2->CCR2 -= 10;
+//			else
+//				 fly_mode = 1;//back to sync.
+//			break;
+			/////////////////////////////////////////////
+		/*case 2://hind wing ahead 180 degree
+		 * 	if(TIM2->CCR2 < 1300)
+				TIM2->CCR2 += 10;
+			else
+				fly_mode = 3;//decrease the speed.
+			break;
+		  case 3:
+			if(TIM2->CCR2 > 1150)
+				TIM2->CCR2 -= 10;
+			else
+				 fly_mode = 1;//back to sync.
+			break;*/
+			/////////////////////////////////////////////
+		/*case 2://fore wing ahead 180 degree
+		 * 	if(TIM2->CCR2 < 1300)
+				TIM2->CCR2 += 10;
+			else
+				fly_mode = 3;//decrease the speed.
+			break;
+		  case 3:
+			if(TIM2->CCR2 > 1150)
+				TIM2->CCR2 -= 10;
+			else
+				 fly_mode = 1;//back to sync.
+			break;*/
+			/////////////////////////////////////////////
+		/*case 2://fore wing ahead 180 degree
+		 * 	if(TIM2->CCR2 < 1300)
+				TIM2->CCR2 += 10;
+			else
+				fly_mode = 3;//decrease the speed.
+			break;
+		  case 3:
+			if(TIM2->CCR2 > 1150)
+				TIM2->CCR2 -= 10;
+			else
+				 fly_mode = 1;//back to sync.
+			break;*/
+		default:
+			break;
+		}
+
+		/*speed detect*/
 
 		HAL_Delay(100);
 		/*float angle_deg;
@@ -332,10 +480,10 @@ int main(void)
 
 		if (error == 0)
 			printf("Raw: %5i\r\n", position);*/
-    /* USER CODE END WHILE */
+	/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
+	/* USER CODE BEGIN 3 */
+	}
   /* USER CODE END 3 */
 }
 
@@ -517,7 +665,7 @@ static void MX_TIM2_Init(void)
 
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_IC_InitTypeDef sConfigIC = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
 
   /* USER CODE BEGIN TIM2_Init 1 */
 
@@ -525,7 +673,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 71;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 65535;
+  htim2.Init.Period = 19999;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -537,7 +685,7 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  if (HAL_TIM_IC_Init(&htim2) != HAL_OK)
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -547,21 +695,22 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
-  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
-  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
   }
-  if (HAL_TIM_IC_ConfigChannel(&htim2, &sConfigIC, TIM_CHANNEL_2) != HAL_OK)
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
 
 }
 
@@ -586,7 +735,7 @@ static void MX_TIM3_Init(void)
   htim3.Instance = TIM3;
   htim3.Init.Prescaler = 0;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 19999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
@@ -635,10 +784,10 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
+  htim4.Init.Period = 19999;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
