@@ -283,7 +283,7 @@ int main(void)
 	__HAL_TIM_SetCounter(&htim2, 100);
 
 
-	int prev_left, prev_right, fly_mode = 0;
+	int prev_left = 0, prev_right = 0, fly_mode = 0, right_speed = 0, left_speed= 0;
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -330,23 +330,66 @@ int main(void)
 		}
 
 		/*phase detect*/
-		float left_angle = left / 5.55555;//900 degree MAX
-		float right_angle = right / 5.55555;//900 degree MAX
+		float left_angle = left / 5.5555555;//3600 degree MAX
+//		if(left_angle > 1800)
+//			left_angle = 3600 - left_angle;
+		float right_angle = right / 5.5555555;//3600 degree MAX
+//		if(right_angle > 1800)
+//			right_angle = 3600 - right_angle;
+
 		int phase_diff = (left_angle > right_angle)?
 				(left_angle - right_angle):(right_angle - left_angle);
-		int left_speed = (left - prev_left) / 5.55555 / 0.1 / 60;//rps
-		int right_speed = (right - prev_right) / 5.55555 / 0.1/ 60;//rps
-		int speed_diff = (left_speed > right_speed)?
-						(left_speed - right_speed):(right_speed - left_speed);
-		prev_left = left;
-		prev_right = right;
+		if(phase_diff > 1800)
+		{
+			if(left_angle > right_angle)
+				phase_diff = 3600 - left_angle + right_angle;
+			else
+				phase_diff = 3600 - right_angle + left_angle;
+		}
 
+		if(left_angle < prev_left)
+		{
+			if(prev_left - left_angle > 1800)
+				left_speed = (3600 - prev_left + left_angle)/2.5;//rpm
+			else
+				left_speed = (prev_left - left_angle)/2.5;//rpm
+		}
+		else
+		{
+			if(left_angle - prev_left > 1800)
+				left_speed = (3600 - left_angle + prev_left)/2.5;//rpm
+			else
+				left_speed = (left_angle - prev_left)/2.5;//rpm
+		}
+
+		if(right_angle < prev_right)
+		{
+			if(prev_right - right_angle > 1800)
+				right_speed = (3600 - prev_right + right_angle)/2.5;//rpm
+			else
+				right_speed = (prev_right - right_angle)/2.5;// rpm
+		}
+		else
+		{
+			if(right_angle - prev_right > 1800)
+				right_speed = (3600 - right_angle + prev_right)/2.5;//rpm
+			else
+				right_speed = (right_angle - prev_right)/2.5;// rpm
+		}
+
+//		int speed_diff = (left_speed > right_speed)?
+//						(left_speed - right_speed):(right_speed - left_speed);
+
+		prev_left = left_angle;
+		prev_right = right_angle;
+
+		printf("------------------------------------------------------\r\n");
 		printf("left angle : %.1f\r\n", left_angle);
 		printf("right angle : %.1f\r\n", right_angle);
 		printf("phase difference : %d\r\n", phase_diff);
-		printf("left motor speed : %d per sec\rright motor speed : %d per sec\r\n",
+		printf("left wing speed : %d per min\rright wing speed : %d per min\r\n",
 				left_speed, right_speed);
-		printf("speed difference : %d\r\n", speed_diff);
+//		printf("speed difference : %d\r\n", speed_diff);
 		printf("flying mode is %d\n", fly_mode);
 
 		/*phase control*/
@@ -357,36 +400,65 @@ int main(void)
 			TIM1->CCR3 = 970;//left wing speed
 			TIM2->CCR2 = 970;//right wing speed
 			TIM1->CCR4 = 970;
-			break;
+//			if(left_angle != right_angle)
+//				fly_mode = 2;
+//			break;
 			/*correction of the balanced speed on both wings*/
-//			if(speed_diff != 600)
-//			{
-//				if(left_speed < right_speed)
-//				{
-//					TIM1->CCR3++;//left wing speed
-//					TIM2->CCR2--;//right wing speed
-//				}
-//				if(left_speed > right_speed)
-//				{
-//					TIM1->CCR3--;//left wing speedㄌ
-//					TIM2->CCR2++;//right wing speed
-//				}
-//				/*hind wing speed*/
-//			}
 		case 2:
-			if(right_speed < 140)
+			if(right_speed < 300)
 				TIM1->CCR3++;
-			else if(right_speed > 140)
+			else if(right_speed > 300)
 				TIM1->CCR3--;	//left wing speed
+			if(left_speed < 300)
+				TIM2->CCR2++;
+			else if(left_speed > 300)
+				TIM2->CCR2--;	//left wing speed
+			if(phase_diff != 450 || phase_diff != 1250)
+			{
+				if(right_angle > left_angle)
+				{
+					TIM2->CCR2++;
+					TIM1->CCR3--;	//left wing speed
+				}
+				else
+				{
+					TIM2->CCR2--;	//left wing speed
+					TIM1->CCR3++;
+				}
+			}
+			break;
+		case 3:
+			if(right_speed < 300)
+				TIM1->CCR3++;
+			else if(right_speed > 300)
+				TIM1->CCR3--;	//left wing speed
+			if(left_speed < 300)
+				TIM2->CCR2++;
+			else if(left_speed > 300)
+				TIM2->CCR2--;	//left wing speed
+			if(phase_diff != 225 || phase_diff != 1125)
+			{
+				if(right_angle > left_angle)
+				{
+					TIM2->CCR2++;
+					TIM1->CCR3--;	//left wing speed
+				}
+				else
+				{
+					TIM2->CCR2--;	//left wing speed
+					TIM1->CCR3++;
+				}
+			}
+			break;
 			break;
 //		case 2:
-//			if(right_speed < 125)
+//			if(right_speed < 6)
 //				TIM1->CCR3++;
-//			else if(right_speed > 125)
+//			else if(right_speed > 6)
 //				TIM1->CCR3--;	//left wing speed
-//			if(right_speed < 125)
+//			if(left_speed < 6)
 //				TIM2->CCR2++;
-//			else if(left_speed > 125)
+//			else if(left_speed > 6)
 //				TIM2->CCR2--;	//left wing speed
 //			break;
 
@@ -733,7 +805,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 0;
+  htim3.Init.Prescaler = 1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 19999;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
